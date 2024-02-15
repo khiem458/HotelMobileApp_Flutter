@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:travel_app/Service/UserService.dart';
 import 'package:travel_app/screens/homescreen.dart';
 import 'package:travel_app/screens/splashscreen.dart';
 import 'package:travel_app/themes/light_theme.dart';
 import 'package:travel_app/realm/realm_services.dart';
 import 'package:travel_app/realm/app_services.dart';
 import 'package:realm/realm.dart';
+import 'package:http/http.dart' as http;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +36,9 @@ Future<void> main() async {
               RealmServices? realmServices) {
             return RealmServices(appServices.app);
           }),
+      Provider<UserService>(
+        create: (_) => UserService(),
+      )
     ],
     builder: (context, child) {
       return const MyApp();

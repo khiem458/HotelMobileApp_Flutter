@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:travel_app/Service/UserService.dart';
 import 'package:travel_app/components/widget/snakbar.dart';
+import 'package:travel_app/models/UserDto.dart';
 import 'package:travel_app/screens/homescreen.dart';
 import 'package:travel_app/realm/app_services.dart';
 import 'package:provider/provider.dart';
@@ -18,25 +20,35 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _name = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
   static bool _isPasswordhidden = true;
   static bool _loadingSignup = false;
 
   void _createAccount() async {
-    final appServices = Provider.of<AppServices>(context, listen: false);
+    final userService = UserService(); // Instantiate UserService
     if (_formKey.currentState!.validate()) {
       setState(() {
         _loadingSignup = true;
       });
-      String name = _name.text;
+
+      String username = _name.text;
       String email = _email.text;
       String password = _password.text;
+      String phone = _phone.text;
+
       try {
-        Map<String, dynamic> userCreated = await appServices
-            .registerUserEmailPassword(email, password, name, context);
-        if (userCreated["success"]) {
+        // Call the registerNewUser method with individual parameters
+        UserDto? registeredUser = await userService.registerNewUser(
+          username: username,
+          email: email,
+          password: password,
+          phone: phone,
+        );
+
+        if (registeredUser != null) {
           await Future.delayed(const Duration(seconds: 1));
           if (!context.mounted) return;
-          showSnakbar(context, userCreated["message"]);
+          showSnakbar(context, "User registered successfully!");
           setState(() {
             _loadingSignup = false;
           });
@@ -47,9 +59,10 @@ class _SignupScreenState extends State<SignupScreen> {
           });
           Future.delayed(const Duration(seconds: 1));
           if (!context.mounted) return;
-          showSnakbar(context, userCreated["message"]);
+          showSnakbar(context, "Failed to register user.");
         }
       } catch (e) {
+        print("Error: $e"); // Add this line to print the error message
         showSnakbar(context, "Some error occurred!");
         setState(() {
           _loadingSignup = false;
@@ -293,6 +306,60 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ),
                       ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6, top: 10),
+                        child: Text("Phone"),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: TextFormField(
+                          controller: _phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Enter your Phone number";
+                            } else if (value.length != 10) {
+                              return "Enter a valid 10-digit phone number";
+                            } else {
+                              return null;
+                            }
+                          },
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 0, horizontal: 16),
+                            hintText: "Your Phone number",
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(100)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Colors.red,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(100)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Colors.red,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(100)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
+                          textAlignVertical: TextAlignVertical.center,
+                          style: TextStyle(
+                            color: Colors.grey[700]!,
+                            fontSize: 15,
+                            height: 1,
+                          ),
+                        ),
+                      ),
                       !_loadingSignup
                           ? Padding(
                               padding: const EdgeInsets.only(top: 40),
@@ -323,59 +390,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                             ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 35),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text("OR"),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 3),
-                                child: ShaderMask(
-                                  shaderCallback: (Rect bounds) {
-                                    return const LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.red,
-                                        Colors.orange,
-                                        Colors.green
-                                      ],
-                                    ).createShader(bounds);
-                                  },
-                                  child: const FaIcon(
-                                    FontAwesomeIcons.google,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 14),
-                                child: FaIcon(
-                                  FontAwesomeIcons.facebook,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 3),
-                                child: FaIcon(
-                                  FontAwesomeIcons.apple,
-                                  size: 27,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+
                       const Padding(
                         padding: EdgeInsets.only(top: 50),
                         child: Align(

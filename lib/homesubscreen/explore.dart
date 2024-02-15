@@ -4,12 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart' hide ConnectionState;
+import 'package:travel_app/Service/UserService.dart';
 import 'package:travel_app/components/categoryhomepage.dart';
 import 'package:travel_app/components/homecard/homecard.dart';
 import 'package:travel_app/components/homecard/homecardloading.dart';
 import 'package:travel_app/components/homegridcard/homegridcard.dart';
 import 'package:travel_app/components/homegridcard/homegridcardloading.dart';
 import 'package:travel_app/components/locationstory.dart';
+import 'package:travel_app/models/UserDto.dart';
 import 'package:travel_app/models/places.dart';
 import 'package:travel_app/realm/realm_services.dart';
 import 'package:travel_app/screens/locationscree.dart';
@@ -25,6 +27,7 @@ class Explorepage extends StatefulWidget {
 }
 
 class _ExplorepageState extends State<Explorepage> {
+  UserDto? _loggedInUser;
   StreamSubscription? connection;
   static bool isoffline = true;
   int counter = 1;
@@ -104,6 +107,7 @@ class _ExplorepageState extends State<Explorepage> {
         });
       }
     });
+    _fetchLoginUser();
     super.initState();
   }
 
@@ -111,6 +115,22 @@ class _ExplorepageState extends State<Explorepage> {
     setState(() {
       _selectedFilter = index;
     });
+  }
+
+  Future<void> _fetchLoginUser() async {
+    try {
+      await UserService().login('email', 'password'); // call the login method to set the user
+      setState(() {
+        _loggedInUser = UserService.loggedInUser; // access the stored user
+        if (_loggedInUser != null) {
+          print("_loggedInUser username: ${_loggedInUser?.username}");
+        } else {
+          print("_loggedInUser is null");
+        }
+      });
+    } catch (e) {
+      print("Error fetching logged-in user data: $e");
+    }
   }
 
   @override
@@ -161,10 +181,10 @@ class _ExplorepageState extends State<Explorepage> {
                   ),
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(left: 2),
                 child: Text(
-                  "Kailash",
+                  _loggedInUser?.username ?? "Guest",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,

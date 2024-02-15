@@ -4,12 +4,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:travel_app/components/widget/snakbar.dart';
-import 'package:travel_app/realm/app_services.dart';
+import 'package:travel_app/Service/UserService.dart';
+import 'package:travel_app/models/UserDto.dart';
 import 'package:travel_app/screens/homescreen.dart';
 import 'package:travel_app/screens/signupscreen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -19,42 +20,49 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
-  static bool _isPasswordhidden = true;
-  static bool _loadingSignup = false;
+  static bool _isPasswordHidden = true;
+  bool _loadingLogin = false;
 
   void _loginToApp() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _loadingSignup = true;
+        _loadingLogin = true;
       });
-      final appServices = Provider.of<AppServices>(context, listen: false);
+
+      final userService = Provider.of<UserService>(context, listen: false);
+
       String email = _email.text;
       String password = _password.text;
-      Map<String, dynamic> userCreated =
-          await appServices.logInUserEmailPassword(email, password, context);
-      if (userCreated["success"]) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userloginornot', 'Yes User login here');
-        Future.delayed(const Duration(seconds: 1));
-        if (!context.mounted) return;
-        showSnakbar(context, userCreated["message"]);
-        setState(() {
-          _loadingSignup = false;
-        });
 
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
-          builder: (context) {
-            return const HomeScreen();
-          },
-        ), (route) => false);
-      } else {
-        setState(() {
-          _loadingSignup = false;
-        });
-        Future.delayed(const Duration(seconds: 1));
-        if (!context.mounted) return;
-        showSnakbar(context, userCreated["message"]);
+      try {
+        print('Sending login request...');
+        UserDto? user = await userService.login(email, password);
+
+        if (user != null) {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userloginornot', 'Yes User login here');
+
+          showSnakbar(context, "Login Successful");
+
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) {
+                return const HomeScreen();
+              },
+            ),
+                (route) => false,
+          );
+        } else {
+          showSnakbar(context, "Login Failed");
+        }
+      } catch (error) {
+        print("Login Error: $error");
+        showSnakbar(context, "Login Failed");
       }
+
+      setState(() {
+        _loadingLogin = false;
+      });
     }
   }
 
@@ -194,10 +202,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               highlightColor: Colors.transparent,
                               onTap: () {
                                 setState(() {
-                                  _isPasswordhidden = !_isPasswordhidden;
+                                  _isPasswordHidden = !_isPasswordHidden;
                                 });
                               },
-                              child: Icon(_isPasswordhidden
+                              child: Icon(_isPasswordHidden
                                   ? Icons.remove_red_eye
                                   : Icons.remove_red_eye_outlined),
                             ),
@@ -230,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           textAlignVertical: TextAlignVertical.center,
-                          obscureText: _isPasswordhidden,
+                          obscureText: _isPasswordHidden,
                           obscuringCharacter: "•",
                           style: TextStyle(
                             color: Colors.grey[700]!,
@@ -252,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: const Text("Forgot Password")),
                         ),
                       ),
-                      _loadingSignup
+                      _loadingLogin
                           ? Padding(
                               padding: const EdgeInsets.only(top: 10),
                               child: ElevatedButton(
