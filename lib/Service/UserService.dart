@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 class UserService {
   static UserDto? loggedInUser;
+  static bool isLogins = false;
 
   Future<List<UserDto>> getAllUsers() async {
     final response = await http.get(SD_CLIENT.apiAllUserUri);
@@ -51,7 +52,6 @@ class UserService {
     }
   }
 
-
   Future<UserDto?> login(String email, String password) async {
 
     // Prepare login data
@@ -70,6 +70,7 @@ class UserService {
     if (response.statusCode == 200) {
       Map<String, dynamic> responseData = json.decode(response.body);
       loggedInUser = UserDto.fromJson(responseData); // store the logged-in user
+      isLogins = true;
       print('Logged in user: ${loggedInUser?.username}');
 
       return loggedInUser;

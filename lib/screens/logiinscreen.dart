@@ -95,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 TextButton(
                     onPressed: () {
+                      UserService.loggedInUser = null;
                       Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
                         builder: (context) {

@@ -184,7 +184,7 @@ class _ExplorepageState extends State<Explorepage> {
               Padding(
                 padding: EdgeInsets.only(left: 2),
                 child: Text(
-                  _loggedInUser?.username ?? "Guest",
+                  UserService.loggedInUser?.username ?? "Guest",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
