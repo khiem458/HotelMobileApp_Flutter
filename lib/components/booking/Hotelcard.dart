@@ -4,11 +4,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:travel_app/models/listing.dart';
+import 'package:travel_app/models/room_model/room_dto.dart';
 import 'package:travel_app/screens/hoteldetailsscreen.dart';
 
 class HotelCardcomp extends StatelessWidget {
-  const HotelCardcomp({super.key, required data}) : _data = data;
-  final Listingmodel _data;
+
+  // const HotelCardcomp({super.key, required data}) : _data = data;
+  // final Listingmodel _data;
+
+  RoomDto data;
+  HotelCardcomp({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +25,7 @@ class HotelCardcomp extends StatelessWidget {
               return const Hoteldetailscreen();
             },
             settings: RouteSettings(
-              arguments: _data,
+              arguments: data,
             ),
           ),
         );
@@ -39,7 +44,7 @@ class HotelCardcomp extends StatelessWidget {
                   ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                     child: Hero(
-                      tag: _data.id,
+                      tag: data.id.toString(),
                       child: CachedNetworkImage(
                         placeholder: (context, url) {
                           return SizedBox(
@@ -72,7 +77,7 @@ class HotelCardcomp extends StatelessWidget {
                         fit: BoxFit.cover,
                         width: MediaQuery.of(context).size.width,
                         height: 200,
-                        imageUrl: _data.imageSrc[0],
+                        imageUrl: data.room_image.toString(),
                       ),
                     ),
                   ),
@@ -82,19 +87,19 @@ class HotelCardcomp extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _data.title.length > 26
-                                ? "${_data.title.substring(0, 25)}..."
-                                : _data.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              overflow: TextOverflow.fade,
-                            ),
-                          ),
+                          // Text(
+                          //   data.room_no!.length > 26
+                          //       ? "${data.room_no!.substring(0, 25)}..."
+                          //       : data.room_no!,
+                          //   style: const TextStyle(
+                          //     color: Colors.orange,
+                          //     fontSize: 20,
+                          //     overflow: TextOverflow.fade,
+                          //   ),
+                          // ),
                           Row(children: [
                             Text(
-                              "${_data.rating} start hotel • ${_data.rating * 10}% ",
+                              "5 start hotel • 90% ",
                               style: const TextStyle(
                                 color: Colors.white,
                               ),
@@ -113,9 +118,10 @@ class HotelCardcomp extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 child: Text(
-                  _data.hotelspecification,
+                  // data.room_type_info!.room_type_name.toString(),
+                  "${data.id} - ${data.room_no.toString()}",
                   style: const TextStyle(
-                    fontSize: 17,
+                    fontSize: 20,
                   ),
                 ),
               ),
@@ -125,24 +131,25 @@ class HotelCardcomp extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Row(
+                      Row(
                         children: [
                           Icon(
-                            Icons.auto_graph_outlined,
+                            // Icons.auto_graph_outlined,
+                            Icons.reduce_capacity,
                             size: 16,
                           ),
                           Text(
-                            "12 m\u00b2",
+                            "${data.room_capacity.toString()} - ${data.room_capacity!+1} people",
                           )
                         ],
                       ),
-                      const Row(
+                      Row(
                         children: [
                           Icon(
                             Icons.king_bed_outlined,
                             size: 16,
                           ),
-                          Text("2 double bed")
+                          Text("${data.room_type_info!.room_type_name} BED")
                         ],
                       ),
                       const Row(
@@ -155,8 +162,7 @@ class HotelCardcomp extends StatelessWidget {
                         ],
                       ),
                       // ignore: unnecessary_null_comparison
-                      _data.country != null
-                          ? const Row(
+                      const Row(
                               children: [
                                 Icon(
                                   Icons.bathroom_outlined,
@@ -165,7 +171,6 @@ class HotelCardcomp extends StatelessWidget {
                                 Text("bath")
                               ],
                             )
-                          : const Row(),
                     ],
                   )),
               const Expanded(
@@ -183,7 +188,7 @@ class HotelCardcomp extends StatelessWidget {
                               size: 16,
                             ),
                             Text(
-                              "free Wi-Fi",
+                              "Free Wi-Fi",
                               style: TextStyle(fontFamily: "Quicksand"),
                             )
                           ],
@@ -191,11 +196,11 @@ class HotelCardcomp extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              Icons.king_bed_outlined,
+                              Icons.screen_lock_landscape,
                               size: 16,
                             ),
                             Text(
-                              "television",
+                              "Television",
                               style: TextStyle(fontFamily: "Quicksand"),
                             )
                           ],
@@ -203,11 +208,11 @@ class HotelCardcomp extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              Icons.ac_unit_outlined,
+                              Icons.add_business,
                               size: 15,
                             ),
                             Text(
-                              "ironing facilities",
+                              "Facilities",
                               style: TextStyle(fontFamily: "Quicksand"),
                             )
                           ],
@@ -222,7 +227,7 @@ class HotelCardcomp extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "₹${_data.price}/night",
+                      "₹${data.room_price}/night",
                       style: const TextStyle(fontSize: 17),
                     ),
                   ],

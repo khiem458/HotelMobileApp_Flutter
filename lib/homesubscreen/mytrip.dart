@@ -18,9 +18,11 @@ class Mytrippage extends StatefulWidget {
 
 class _MytrippageState extends State<Mytrippage>
     with SingleTickerProviderStateMixin {
+
   StreamSubscription? connectiontrip;
   late TabController _tabbarcontroller;
   bool isTripoffline = true;
+
   void checkConnectivity() async {
     var result = await Connectivity().checkConnectivity();
     if (result == ConnectivityResult.mobile) {
@@ -97,7 +99,7 @@ class _MytrippageState extends State<Mytrippage>
     return Scaffold(
         appBar: AppBar(
           surfaceTintColor: Colors.transparent,
-          title: const Text("My Trips"),
+          title: const Text("My Bookings"),
           centerTitle: true,
           bottom: PreferredSize(
               preferredSize: const Size.fromHeight(50),
@@ -139,7 +141,9 @@ class _MytrippageState extends State<Mytrippage>
               )),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+
+          },
           child: const Icon(Icons.add),
         ),
         body: TabBarView(controller: _tabbarcontroller, children: [

@@ -4,11 +4,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:travel_app/models/booking_model/booking_dto.dart';
 import 'package:travel_app/models/reservation.dart';
 
 class Hotelbooktripcard extends StatelessWidget {
-  const Hotelbooktripcard({super.key, required data}) : _data = data;
-  final Reservationmodel _data;
+  // const Hotelbooktripcard({super.key, required data}) : _data = data;
+  // final Reservationmodel _data;
+
+  final BookingDto data;
+  const Hotelbooktripcard({super.key, required this.data});
+
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +62,7 @@ class Hotelbooktripcard extends StatelessWidget {
                     fit: BoxFit.cover,
                     width: MediaQuery.of(context).size.width,
                     height: 200,
-                    imageUrl: _data.tripcoverimage,
+                    imageUrl: data.room_info!.room_image.toString(),
                   ),
                 ),
                 Positioned(
@@ -67,11 +72,11 @@ class Hotelbooktripcard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _data.tripname.length > 26
-                              ? "${_data.tripname.substring(0, 25)}..."
-                              : _data.tripname,
+                          data.room_info!.room_no!.length > 26
+                              ? "${ data.room_info!.room_no!.substring(0, 25)}..."
+                              :  data.room_info!.room_no!,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Colors.red,
                             fontSize: 20,
                             overflow: TextOverflow.fade,
                           ),
@@ -83,7 +88,7 @@ class Hotelbooktripcard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: Text(
-                _data.destinationname,
+                data.room_info!.room_description.toString(),
                 style: const TextStyle(
                   fontSize: 17,
                 ),
@@ -98,7 +103,7 @@ class Hotelbooktripcard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        DateFormat.yMMMEd().format(_data.startDate),
+                        DateFormat('yyyy-MM-dd').format(data.booking_from as DateTime),
                         style: const TextStyle(fontFamily: "Quicksand"),
                       ),
                       const Text(
@@ -106,7 +111,7 @@ class Hotelbooktripcard extends StatelessWidget {
                         style: TextStyle(fontFamily: "Quicksand"),
                       ),
                       Text(
-                        DateFormat.yMMMEd().format(_data.enddate),
+                        DateFormat('yyyy-MM-dd').format(data.booking_to as DateTime),
                         style: const TextStyle(fontFamily: "Quicksand"),
                       ),
                     ],
@@ -118,7 +123,7 @@ class Hotelbooktripcard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "₹${_data.totalprice}/ ${_data.enddate.difference(_data.startDate).inDays} nights",
+                    "₹${data.total_price}/ ${data.total_day} nights",
                     style: const TextStyle(fontSize: 17),
                   ),
                 ],

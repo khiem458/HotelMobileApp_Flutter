@@ -4,6 +4,7 @@ import 'package:realm/realm.dart' hide ConnectionState;
 import 'package:travel_app/components/booking/Hotelcard.dart';
 import 'package:travel_app/components/booking/Hotelcardskeleton.dart';
 import 'package:travel_app/models/listing.dart';
+import 'package:travel_app/models/room_model/room_dto.dart';
 import 'package:travel_app/realm/realm_services.dart';
 import 'package:travel_app/realm/schemas.dart';
 
@@ -17,6 +18,7 @@ class Hotelbookingplace extends StatefulWidget {
 class _HotelbookingplaceState extends State<Hotelbookingplace> {
   final List<int> _hotels = [1, 2, 3, 4, 5, 6, 7, 8];
   final String _country = "IND";
+
   @override
   Widget build(BuildContext context) {
     final realmServices = Provider.of<RealmServices>(context);
@@ -38,12 +40,14 @@ class _HotelbookingplaceState extends State<Hotelbookingplace> {
               } else {
                 if (snapshot.hasData && snapshot.data != null) {
                   final results = snapshot.data!.results;
+                  RoomDto room = RoomDto();
                   return SliverList.builder(
                     itemCount: results.realm.isClosed ? 0 : results.length,
                     itemBuilder: (context, index) {
                       return results[index].isValid
                           ? HotelCardcomp(
-                              data: Listingmodel.fromJson(results[index]),
+                              // data: Listingmodel.fromJson(results[index]),
+                              data: room,
                             )
                           : const SizedBox(height: 0);
                     },

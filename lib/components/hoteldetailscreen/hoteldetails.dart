@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,15 +9,22 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:realm/realm.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:travel_app/Service/UserService.dart';
 import 'package:travel_app/components/hoteldetailscreen/hotelbookingpage.dart';
 import 'package:travel_app/components/imagecarousel/carousel.dart';
 import 'package:travel_app/components/widget/snakbar.dart';
+import 'package:travel_app/models/UserDto.dart';
+import 'package:travel_app/models/booking_model/booking_dto.dart';
 import 'package:travel_app/models/listing.dart';
+import 'package:travel_app/models/room_model/room_dto.dart';
 import 'package:travel_app/realm/realm_services.dart';
 
 class Hoteldetailpage extends StatefulWidget {
-  const Hoteldetailpage({super.key, data}) : _data = data;
-  final Listingmodel _data;
+  // const Hoteldetailpage({super.key, data}) : _data = data;
+  // final Listingmodel _data;
+
+  RoomDto data;
+  Hoteldetailpage({super.key, required this.data});
 
   @override
   State<Hoteldetailpage> createState() => _HoteldetailpageState();
@@ -25,12 +33,18 @@ class Hoteldetailpage extends StatefulWidget {
 class _HoteldetailpageState extends State<Hoteldetailpage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+
   bool showMap = false;
+
   Timer? time;
+
+  UserDto? _loggedInUser;
+
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(22.677612754699826, 72.88234901045453),
     zoom: 14.4746,
   );
+
   DateTimeRange? _daterange;
 
   void delaymap() {
@@ -41,8 +55,27 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
     });
   }
 
+  Future<void> _fetchLoginUser() async {
+    try {
+      // await UserService().login('email', 'password'); // call the login method to set the user
+      setState(() {
+        _loggedInUser = UserService.loggedInUser; // access the stored user
+        if (_loggedInUser != null) {
+          print("_loggedInUser id: ${_loggedInUser?.id}");
+          print("_loggedInUser username: ${_loggedInUser?.username}");
+        } else {
+          print("_loggedInUser is null");
+        }
+      });
+    } catch (e) {
+      print("Error fetching logged-in user data: $e");
+    }
+  }
+
+
   @override
   void initState() {
+    _fetchLoginUser();
     super.initState();
     delaymap();
   }
@@ -100,13 +133,16 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
                         _daterange = date;
                       });
                     }
+                    else {
+                      showSnakbar(context, "Please select date before booking");
+                    }
                   },
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "₹${_daterange != null ? widget._data.price * (_daterange!.end.difference(_daterange!.start).inDays) : widget._data.price} night",
+                          "₹${_daterange != null ? widget.data.room_price! * (_daterange!.end.difference(_daterange!.start).inDays) : widget.data.room_price} total",
                           style: TextStyle(
                             color: Theme.of(context)
                                 .colorScheme
@@ -148,25 +184,66 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    // print(DateFormat('yyyy-MM-dd').format(_daterange!.start));
+                    // print(DateFormat('yyyy-MM-dd').format(_daterange!.end));
+                    // print("Number of Member: ${widget.data.room_capacity}");
+                    // print(_loggedInUser == null ? "Please Login to Booking" : "User id: ${_loggedInUser!.id.toString()}");
+
+                    if(_loggedInUser == null) {
+                      showSnakbar(context, "Please Login to Continue Your Booking");
+                      return;
+                    }
+
                     if (_daterange == null) {
                       showSnakbar(context, "Please select date");
                       return;
                     }
-                    if (realmProvider.currentUser != null &&
-                        realmProvider.currentUser!.provider !=
-                            AuthProviderType.anonymous) {
-                      Navigator.of(context).push(CupertinoPageRoute(
+
+                    BookingDto newBookingDto = BookingDto();
+                    newBookingDto.booking_from = _daterange!.start;
+                    newBookingDto.booking_to = _daterange!.end;
+                    newBookingDto.number_of_member = widget.data.room_capacity;
+                    newBookingDto.is_active = true;
+                    newBookingDto.customer_id = _loggedInUser!.id;
+                    newBookingDto.customer_info = _loggedInUser;
+                    newBookingDto.room_id = widget.data.id;
+                    newBookingDto.room_info = widget.data;
+
+                    // Navigator.of(context).push(CupertinoPageRoute(
+                    //         builder: (context) {
+                    //           return Hotelconfirmbook(
+                    //             id: widget.data.id,
+                    //             bookingrange: _daterange,
+                    //           );
+                    //         },
+                    //
+                    // ));
+
+                    Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) {
-                          return Hotelconfirmbook(
-                            id: widget._data.id,
-                            bookingrange: _daterange,
-                          );
+                          return Hotelconfirmbook();
                         },
-                      ));
-                    } else {
-                      showSnakbar(
-                          context, "Book hotel room plaese login first");
-                    }
+                        settings: RouteSettings(
+                          arguments: newBookingDto
+                        ),
+                      )
+                    );
+
+                    // if (realmProvider.currentUser != null &&
+                    //     realmProvider.currentUser!.provider !=
+                    //         AuthProviderType.anonymous) {
+                    //   Navigator.of(context).push(CupertinoPageRoute(
+                    //     builder: (context) {
+                    //       return Hotelconfirmbook(
+                    //         id: widget._data.id,
+                    //         bookingrange: _daterange,
+                    //       );
+                    //     },
+                    //   ));
+                    // } else {
+                    //   showSnakbar(
+                    //       context, "Book hotel room plaese login first");
+                    // }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -178,7 +255,7 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
                     ),
                   ),
                   child: const Text(
-                    "Book",
+                    "Booking",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -192,31 +269,35 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Imagecarousel(id: widget._data.id, images: widget._data.imageSrc),
+            // Imagecarousel(id: widget.data.id, images: widget.data.room_image),
+            // Image.network(widget.data.room_image.toString()),
+            CachedNetworkImage(imageUrl: widget.data.room_image.toString()),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget._data.title,
+                      "${widget.data.id} -- ${widget.data.room_no.toString()}",
                       style: TextStyle(
                         fontSize: 24,
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
+                    SizedBox(height: 20,),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Icon(
-                          FontAwesomeIcons.locationDot,
+                          // FontAwesomeIcons.locationDot,
+                          Icons.king_bed_outlined,
                           color: Colors.orange,
-                          size: 17,
+                          size: 20,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 5, top: 3),
                           child: Text(
-                            widget._data.country,
+                            "${widget.data.room_type_info!.room_type_name} BED",
                             style: TextStyle(
                                 fontSize: 17,
                                 color: Theme.of(context)
@@ -228,40 +309,17 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
                       ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 1),
                       child: Divider(
                         color: Theme.of(context)
                             .colorScheme
                             .onPrimary
-                            .withOpacity(0.1),
-                        thickness: 0.4,
-                        height: 10,
-                      ),
-                    ),
-                    Text(
-                      widget._data.description,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Quicksand',
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(1),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 0),
-                      child: Divider(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.1),
+                            .withOpacity(0.8),
                         thickness: 0.4,
                       ),
                     ),
                     Text(
-                      "What this place offers",
+                      widget.data.room_description.toString(),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -272,118 +330,142 @@ class _HoteldetailpageState extends State<Hoteldetailpage> {
                             .withOpacity(1),
                       ),
                     ),
-                    SizedBox(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(0),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget._data.facilities.length,
-                        itemBuilder: (context, index) {
-                          return Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 3, horizontal: 6),
-                                child: Icon(
-                                  Icons.wifi,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimary
-                                      .withOpacity(0.4),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 3, vertical: 6),
-                                child: Text(
-                                  widget._data.facilities[index].fav,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Quicksand',
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary
-                                        .withOpacity(1),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Divider(
                         color: Theme.of(context)
                             .colorScheme
                             .onPrimary
-                            .withOpacity(0.1),
+                            .withOpacity(0.8),
                         thickness: 0.4,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        "Where you'll be",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Quicksand',
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimary
-                              .withOpacity(1),
-                        ),
-                      ),
-                    ),
-                    showMap
-                        ? SizedBox(
-                            height: 300,
-                            child: ClipRRect(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10)),
-                              child: GoogleMap(
-                                mapType: MapType.normal,
-                                zoomGesturesEnabled: true,
-                                zoomControlsEnabled: true,
-                                initialCameraPosition: _kGooglePlex,
-                                onMapCreated: (GoogleMapController controller) {
-                                  _controller.complete(controller);
-                                },
-                                myLocationEnabled: true,
-                                compassEnabled: true,
-                              ),
-                            ),
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: SizedBox(
-                              height: 300,
-                              child: Shimmer(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFEBEBF4),
-                                    Color(0xFFF4F4F4),
-                                    Color(0xFFEBEBF4),
-                                  ],
-                                  stops: [
-                                    0.1,
-                                    0.3,
-                                    0.4,
-                                  ],
-                                  begin: Alignment(-1.0, -0.3),
-                                  end: Alignment(1.0, 0.3),
-                                  tileMode: TileMode.clamp,
-                                ),
-                                child: Container(
-                                  height: 300,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ),
+                    // Text(
+                    //   "What this place offers",
+                    //   style: TextStyle(
+                    //     fontSize: 20,
+                    //     fontWeight: FontWeight.bold,
+                    //     fontFamily: 'Quicksand',
+                    //     color: Theme.of(context)
+                    //         .colorScheme
+                    //         .onPrimary
+                    //         .withOpacity(1),
+                    //   ),
+                    // ),
+                    // SizedBox(
+                    //   child: ListView.builder(
+                    //     padding: const EdgeInsets.all(0),
+                    //     shrinkWrap: true,
+                    //     physics: const NeverScrollableScrollPhysics(),
+                    //     itemCount: widget._data.facilities.length,
+                    //     itemBuilder: (context, index) {
+                    //       return Row(
+                    //         children: [
+                    //           Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 vertical: 3, horizontal: 6),
+                    //             child: Icon(
+                    //               Icons.wifi,
+                    //               color: Theme.of(context)
+                    //                   .colorScheme
+                    //                   .onPrimary
+                    //                   .withOpacity(0.4),
+                    //             ),
+                    //           ),
+                    //           Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 horizontal: 3, vertical: 6),
+                    //             child: Text(
+                    //               widget._data.facilities[index].fav,
+                    //               style: TextStyle(
+                    //                 fontSize: 15,
+                    //                 fontWeight: FontWeight.w500,
+                    //                 fontFamily: 'Quicksand',
+                    //                 color: Theme.of(context)
+                    //                     .colorScheme
+                    //                     .onPrimary
+                    //                     .withOpacity(1),
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 5),
+                    //   child: Divider(
+                    //     color: Theme.of(context)
+                    //         .colorScheme
+                    //         .onPrimary
+                    //         .withOpacity(0.8),
+                    //     thickness: 0.4,
+                    //   ),
+                    // ),
+
+                    // Padding(
+                    //   padding: const EdgeInsets.only(bottom: 4),
+                    //   child: Text(
+                    //     "Where you'll be",
+                    //     style: TextStyle(
+                    //       fontSize: 20,
+                    //       fontWeight: FontWeight.bold,
+                    //       fontFamily: 'Quicksand',
+                    //       color: Theme.of(context)
+                    //           .colorScheme
+                    //           .onPrimary
+                    //           .withOpacity(1),
+                    //     ),
+                    //   ),
+                    // ),
+                    // showMap
+                    //     ? SizedBox(
+                    //         height: 300,
+                    //         child: ClipRRect(
+                    //           borderRadius:
+                    //               const BorderRadius.all(Radius.circular(10)),
+                    //           child: GoogleMap(
+                    //             mapType: MapType.normal,
+                    //             zoomGesturesEnabled: true,
+                    //             zoomControlsEnabled: true,
+                    //             initialCameraPosition: _kGooglePlex,
+                    //             onMapCreated: (GoogleMapController controller) {
+                    //               _controller.complete(controller);
+                    //             },
+                    //             myLocationEnabled: true,
+                    //             compassEnabled: true,
+                    //           ),
+                    //         ),
+                    //       )
+                    //     : ClipRRect(
+                    //         borderRadius: BorderRadius.circular(10),
+                    //         child: SizedBox(
+                    //           height: 300,
+                    //           child: Shimmer(
+                    //             gradient: const LinearGradient(
+                    //               colors: [
+                    //                 Color(0xFFEBEBF4),
+                    //                 Color(0xFFF4F4F4),
+                    //                 Color(0xFFEBEBF4),
+                    //               ],
+                    //               stops: [
+                    //                 0.1,
+                    //                 0.3,
+                    //                 0.4,
+                    //               ],
+                    //               begin: Alignment(-1.0, -0.3),
+                    //               end: Alignment(1.0, 0.3),
+                    //               tileMode: TileMode.clamp,
+                    //             ),
+                    //             child: Container(
+                    //               height: 300,
+                    //               color: Colors.grey,
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ),
                   ]),
             ),
           ],

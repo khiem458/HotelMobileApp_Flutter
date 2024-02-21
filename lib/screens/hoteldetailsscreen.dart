@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:like_button/like_button.dart';
 import 'package:travel_app/components/hoteldetailscreen/hoteldetails.dart';
+import 'package:travel_app/models/room_model/room_dto.dart';
 
 class Hoteldetailscreen extends StatefulWidget {
   const Hoteldetailscreen({super.key});
@@ -13,7 +14,9 @@ class Hoteldetailscreen extends StatefulWidget {
 class _HoteldetailscreenState extends State<Hoteldetailscreen> {
   @override
   Widget build(BuildContext context) {
-    dynamic data = ModalRoute.of(context)!.settings.arguments;
+
+    RoomDto data = ModalRoute.of(context)!.settings.arguments as RoomDto;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
