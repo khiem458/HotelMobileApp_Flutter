@@ -11,6 +11,7 @@ import 'package:travel_app/components/homecard/homecardloading.dart';
 import 'package:travel_app/components/homegridcard/homegridcard.dart';
 import 'package:travel_app/components/homegridcard/homegridcardloading.dart';
 import 'package:travel_app/components/locationstory.dart';
+import 'package:travel_app/homesubscreen/booking.dart';
 import 'package:travel_app/models/UserDto.dart';
 import 'package:travel_app/models/places.dart';
 import 'package:travel_app/realm/realm_services.dart';
@@ -47,6 +48,7 @@ class _ExplorepageState extends State<Explorepage> {
     {"category": "Farm", "icon": Icons.local_fire_department_outlined},
   ];
   int _selectedFilter = 0;
+
 
   void checkConnectivity() async {
     var result = await Connectivity().checkConnectivity();
@@ -156,21 +158,21 @@ class _ExplorepageState extends State<Explorepage> {
             floating: true,
             toolbarHeight: 50,
             title: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-              InkWell(
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () {
-                  // globalProvider.toggleDrawer();
-                },
-                child: CircleAvatar(
-                  backgroundColor: Colors.blueGrey[200]!,
-                  backgroundImage: const NetworkImage(
-                    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                  ),
-                ),
-              ),
+              // InkWell(
+              //   focusColor: Colors.transparent,
+              //   hoverColor: Colors.transparent,
+              //   splashColor: Colors.transparent,
+              //   highlightColor: Colors.transparent,
+              //   onTap: () {
+              //     // globalProvider.toggleDrawer();
+              //   },
+              //   child: CircleAvatar(
+              //     backgroundColor: Colors.blueGrey[200]!,
+              //     backgroundImage: const NetworkImage(
+              //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+              //     ),
+              //   ),
+              // ),
               const Padding(
                 padding: EdgeInsets.only(left: 10),
                 child: Text(
@@ -194,18 +196,18 @@ class _ExplorepageState extends State<Explorepage> {
               )
             ]),
             actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: InkWell(
-                  splashFactory: NoSplash.splashFactory,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                  ),
-                ),
-              )
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 2),
+              //   child: InkWell(
+              //     splashFactory: NoSplash.splashFactory,
+              //     hoverColor: Colors.transparent,
+              //     highlightColor: Colors.transparent,
+              //     splashColor: Colors.transparent,
+              //     child: Image.asset(
+              //       "assets/images/logo.png",
+              //     ),
+              //   ),
+              // )
             ],
           ),
           SliverAppBar(
@@ -235,40 +237,40 @@ class _ExplorepageState extends State<Explorepage> {
                   }
                 });
               },
-              child: Row(
-                children: [
-                  const Icon(Icons.location_pin),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 1),
-                    child: Text(_location.length > 18
-                        ? "${_location.substring(0, 17)}..."
-                        : _location),
-                  ),
-                  const Icon(
-                    Icons.arrow_drop_down,
-                    color: Colors.orange,
-                    size: 30,
-                  )
-                ],
-              ),
+              // child: Row(
+              //   children: [
+              //     const Icon(Icons.location_pin),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: 1),
+              //       child: Text(_location.length > 18
+              //           ? "${_location.substring(0, 17)}..."
+              //           : _location),
+              //     ),
+              //     const Icon(
+              //       Icons.arrow_drop_down,
+              //       color: Colors.orange,
+              //       size: 30,
+              //     )
+              //   ],
+              // ),
             ),
             actions: <Widget>[
               // Using Stack to show Notification Badge
               Stack(
                 children: <Widget>[
-                  IconButton(
-                      padding: const EdgeInsets.only(right: 4),
-                      icon: const Icon(Icons.notifications),
-                      onPressed: () {
-                        setState(() {
-                          counter = 0;
-                        });
-                        Navigator.push(context, CupertinoPageRoute(
-                          builder: (context) {
-                            return const NotificationScreen();
-                          },
-                        ));
-                      }),
+                  // IconButton(
+                  //     padding: const EdgeInsets.only(right: 4),
+                  //     icon: const Icon(Icons.notifications),
+                  //     onPressed: () {
+                  //       setState(() {
+                  //         counter = 0;
+                  //       });
+                  //       Navigator.push(context, CupertinoPageRoute(
+                  //         builder: (context) {
+                  //           return const NotificationScreen();
+                  //         },
+                  //       ));
+                  //     }),
                   counter != 0
                       ? Positioned(
                           right: 11,
@@ -337,11 +339,14 @@ class _ExplorepageState extends State<Explorepage> {
                         ),
                       ),
                       onTap: () {
-                        Navigator.push(context, CupertinoPageRoute(
-                          builder: (context) {
-                            return const SearchScreen();
-                          },
-                        ));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return Bookingpage();
+                            },
+                          ),
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(

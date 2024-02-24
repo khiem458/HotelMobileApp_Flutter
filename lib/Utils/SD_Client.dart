@@ -1,5 +1,5 @@
 class SD_CLIENT {
-  static final String DOMAIN_APP_API = "http://172.16.2.101:9999";
+  static final String DOMAIN_APP_API = "http://172.16.1.116:9999";
 
   //test
   static final Uri apiAllUserUri = Uri.parse('$DOMAIN_APP_API/api/users/all');
@@ -7,6 +7,11 @@ class SD_CLIENT {
   // Login register
   static final Uri apiLoginUri = Uri.parse('$DOMAIN_APP_API/api/users/login');
   static final Uri apiRegisterUri = Uri.parse('$DOMAIN_APP_API/api/users/register');
+  static final Uri apiCheckEmailUri = Uri.parse('$DOMAIN_APP_API/api/user/emailexist');
+  
+  //payment
+  static final Uri apiCreatepayment = Uri.parse('$DOMAIN_APP_API/api/paymentcontroller/create');
+  static final Uri apiSendMail = Uri.parse('$DOMAIN_APP_API/api/paymentcontroller/sendEmail');
 
   //Room Api URL
   static final String api_room_allRoom = "$DOMAIN_APP_API/api/roomcontroller/all";

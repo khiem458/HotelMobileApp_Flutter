@@ -4,7 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:travel_app/Service/PaymentService.dart';
 import 'package:travel_app/models/booking_model/booking_dto.dart';
+import 'package:travel_app/models/paymentDto.dart';
 import 'package:travel_app/models/reservation.dart';
 
 class Hotelbooktripcard extends StatelessWidget {
@@ -14,6 +16,29 @@ class Hotelbooktripcard extends StatelessWidget {
   final BookingDto data;
   const Hotelbooktripcard({super.key, required this.data});
 
+
+  Future<void> createPayment(BuildContext context) async {
+    try {
+      // Call the createNewPayment method with the BookingDto
+      PaymentDto createdPayment = await PaymentService.createNewPayment(data);
+
+      // Additional actions after successful payment
+      // For example, show a confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment successful!'),
+        ),
+      );
+    } catch (e) {
+      // Handle exceptions, e.g., display an error message
+      print('Error creating payment: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment failed. Please try again.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +139,26 @@ class Hotelbooktripcard extends StatelessWidget {
                         DateFormat('yyyy-MM-dd').format(data.booking_to as DateTime),
                         style: const TextStyle(fontFamily: "Quicksand"),
                       ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          // Call the createNewPayment method here
+                          await createPayment(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.orangeAccent,
+                          onPrimary: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                        child: Text("PAY"),
+                      ),
                     ],
-                  )),
+                  ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

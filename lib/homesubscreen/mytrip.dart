@@ -140,12 +140,7 @@ class _MytrippageState extends State<Mytrippage>
                 ),
               )),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
 
-          },
-          child: const Icon(Icons.add),
-        ),
         body: TabBarView(controller: _tabbarcontroller, children: [
           SafeArea(
             child: CustomScrollView(

@@ -19,6 +19,27 @@ class UserService {
     }
   }
 
+  Future<bool> existingEmail(String email) async {
+    try {
+      final response = await http.get(
+        SD_CLIENT.apiCheckEmailUri.replace(queryParameters: {'email': email}),
+        // Add any headers if needed
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        // Assuming your API returns a boolean value indicating email existence
+        return responseData['exists'] ?? false;
+      } else {
+        print('Failed to check email existence with status code: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error during email existence check: $e');
+      return false;
+    }
+  }
+
   Future<UserDto?> registerNewUser({
     required String username,
     required String email,
@@ -26,6 +47,14 @@ class UserService {
     required String phone,
   }) async {
     try {
+      // Check if email already exists
+      bool emailExists = await existingEmail(email);
+      if (emailExists) {
+        print('Email already exists!');
+        return null;
+      }
+
+      // Continue with registration if email is unique
       final registrationData = {
         'username': username,
         'email': email,
@@ -51,6 +80,7 @@ class UserService {
       return null;
     }
   }
+
 
   Future<UserDto?> login(String email, String password) async {
 

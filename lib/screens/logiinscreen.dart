@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   static bool _isPasswordHidden = true;
   bool _loadingLogin = false;
 
+
   void _loginToApp() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
